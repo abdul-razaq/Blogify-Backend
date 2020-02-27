@@ -1,8 +1,5 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const bcrypt = require('bcryptjs');
-
-const throwError = require('../utils/throwError');
 
 const UserSchema = new Schema({
   firstname: {
@@ -44,14 +41,6 @@ const UserSchema = new Schema({
   },
 
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
-});
-
-UserSchema.pre('save', async next => {
-  try {
-    await bcrypt.hash(this.password, 12);
-  } catch (error) {
-    throwError(500, error.message);
-  }
 });
 
 module.exports = mongoose.model('User', UserSchema);

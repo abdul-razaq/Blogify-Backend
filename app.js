@@ -2,12 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-const MONGODB_URI = 'mongodb://127.0.0.1:27017/blogify';
-const PORT = process.env.port || 3000;
-
 const authRouters = require('./routes/auth');
 
 const app = express();
+
+// CONSTANTS
+const MONGODB_URI = 'mongodb://127.0.0.1:27017/blogify';
+const PORT = process.env.port || 3000;
 
 // Middleware configurations
 app.use(bodyParser.json());
@@ -28,9 +29,18 @@ app.use((req, res, next) => {
 // Register Routes Middlewares
 app.use('/auth', authRouters);
 
+// Error 404 middleware
+app.use((req, res) => {
+  res.status(404).json({ message: 'Page not found' });
+});
+
 // General error handling middleware
 app.use((error, req, res, next) => {
-  const { statusCode: status, message, data } = error;
+  const {
+    statusCode: status = 500,
+    message = 'An error has occurred',
+    data = null,
+  } = error;
   res.status(status).json({ message, data });
 });
 
@@ -42,7 +52,7 @@ mongoose
   .then(() => {
     console.log('Application connected to the database successfully');
     app.listen(PORT, () => {
-      console.log('Application listening on port' + PORT);
+      console.log('Application listening on port ' + PORT);
     });
   })
   .catch(err => {
