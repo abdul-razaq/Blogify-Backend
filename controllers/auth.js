@@ -138,3 +138,16 @@ exports.updateUserStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+
+exports.logout = (req, res, next) => {
+  // grab the request header and make sure the user is authenticated
+  // if the user is authenticated, delete the token in the header
+}
+
+exports.deleteUser = (req, res, next) => {
+  // grab the userId to delete from the Authorization request header
+  // check to see if the userId we want to delete exists
+  // if it exists, make sure we are authenticated before we can delete a user and the user id matches the currently logged in user
+  // delete the user from the database
+}

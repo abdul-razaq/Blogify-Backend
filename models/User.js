@@ -32,12 +32,14 @@ const UserSchema = new Schema({
     type: Boolean,
     required: true,
     allowNull: false,
+    default: true,
   },
 
   isAdmin: {
     type: Boolean,
     required: true,
     allowNull: false,
+    default: false,
   },
 
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
