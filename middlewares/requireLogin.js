@@ -9,11 +9,11 @@ module.exports = (req, res, next) => {
     error.statusCode = 401;
     throw error;
   }
-  // if it is set, extract the token from the header
+  // if it is set, extract the token from the header and split it
   const token = authHeader.split(' ')[1];
   let decodedToken;
   try {
-    // verify and decode the token with jwt using my secret
+    // verify and decode the token with jwt using the secret key
     decodedToken = jsonWebToken.verify(token, 'thisismysecret');
   } catch (error) {
     if (!error.statusCode) {

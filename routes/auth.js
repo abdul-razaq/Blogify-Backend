@@ -36,6 +36,8 @@ router.put(
 
 router.post('/login', authControllers.login);
 
+router.post('/logout', authControllers.logout);
+
 router.get('/user/status/', requireLogin, authControllers.getUserStatus);
 
 router.patch('/user/status/', requireLogin, authControllers.updateUserStatus);
