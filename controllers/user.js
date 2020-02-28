@@ -1,8 +1,65 @@
+const User = require('../models/User');
+
+exports.getUser = async (req, res, next) => {
+  const { userId } = req.params;
+
+  if (!req.userId && userId !== req.userId) {
+    const error = new Error('Unauthorized!');
+    error.statusCode = 403;
+    next(error)
+  }
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      const error = new Error('User does not exist!');
+      error.statusCode = 404;
+      throw error;
+    }
+    res.status(200).json({
+      message: 'User found!',
+      data: {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+        isActive: user.isActive,
+      },
+    });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.deleteUser = async (req, res, next) => {
+  const { userId } = req.params;
+
+  if (!req.userId && userId !== req.userId) {
+    const error = new Error('Unauthorized!');
+    error.statusCode = 403;
+    throw error;
+  }
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error('Unauthorized to delete user');
+      error.statusCode = 404;
+      throw error;
+    }
+    await User.findByIdAndDelete({ _id: req.userId });
+    res.status(200).json({ message: 'user deleted successfully!' });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
 exports.getUserStatus = async (req, res, next) => {
-  // grab the userId
   const { userId } = req.body;
-  console.log(req.headers);
-  // find that user by id
+
   try {
     const user = await User.findById(userId);
     if (!user) {
@@ -39,24 +96,6 @@ exports.updateUserStatus = async (req, res, next) => {
     res
       .status(201)
       .json({ message: 'user status updated', userStatus: user.isActive });
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
-  }
-};
-
-exports.deleteUser = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.userId);
-    if (!user) {
-      const error = new Error('User does not exist');
-      error.statusCode = 404;
-      throw error;
-    }
-    await User.findByIdAndDelete({ _id: req.userId });
-    res.status(200).json({ message: 'user deleted successfully!' });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;

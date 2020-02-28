@@ -79,7 +79,7 @@ exports.login = async (req, res, next) => {
         userId: loadedUser._id.toString(),
       });
     } else {
-      const error = new Error('Invalid password');
+      const error = new Error('email or password is incorrect!');
       error.statusCode = 422;
       throw error;
     }
