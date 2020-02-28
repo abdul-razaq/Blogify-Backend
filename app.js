@@ -2,7 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-const authRouters = require('./routes/auth');
+const authRouters = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -27,7 +28,8 @@ app.use((req, res, next) => {
 });
 
 // Register Routes Middlewares
-app.use('/auth', authRouters);
+app.use('/auth', authRoutes);
+app.use('/user', userRoutes);
 
 // Error 404 middleware
 app.use((req, res) => {

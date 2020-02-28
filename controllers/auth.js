@@ -91,55 +91,6 @@ exports.login = async (req, res, next) => {
   }
 };
 
-exports.getUserStatus = async (req, res, next) => {
-  // grab the userId
-  const { userId } = req.body;
-  console.log(req.headers);
-  // find that user by id
-  try {
-    const user = await User.findById(userId);
-    if (!user) {
-      const error = new Error('No user found');
-      error.statusCode = 404;
-      throw error;
-    }
-    // send the status field back to the client
-    res
-      .status(200)
-      .json({ message: 'User status found', userStatus: user.isActive });
-  } catch (error) {
-    if (!error.statusCode) {
-      statusCode = 500;
-    }
-    next(error);
-  }
-};
-
-exports.updateUserStatus = async (req, res, next) => {
-  // get the userId
-  const { userId, newStatus } = req.body;
-  // check to see if a user with that id exists
-  try {
-    const user = await User.findById(userId);
-    if (!user) {
-      const error = new Error('No user found');
-      error.statusCode = 404;
-      throw error;
-    }
-    // update the status field
-    user.isActive = newStatus;
-    await user.save();
-    res
-      .status(201)
-      .json({ message: 'user status updated', userStatus: user.isActive });
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
-  }
-};
-
 exports.logout = (req, res, next) => {
   // grab the request header and make sure the user is authenticated
   const authHeader = req.get('Authorization');
@@ -151,11 +102,4 @@ exports.logout = (req, res, next) => {
   // if the user is authenticated, delete the token in the header
   delete req.headers.authorization;
   res.status(200).json({ message: 'Logged out successfully' });
-};
-
-exports.deleteUser = (req, res, next) => {
-  // grab the userId to delete from the Authorization request header
-  // check to see if the userId we want to delete exists
-  // if it exists, make sure we are authenticated before we can delete a user and the user id matches the currently logged in user
-  // delete the user from the database
 };
