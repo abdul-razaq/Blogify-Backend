@@ -6,7 +6,7 @@ exports.getUser = async (req, res, next) => {
   if (!req.userId && userId !== req.userId) {
     const error = new Error('Unauthorized!');
     error.statusCode = 403;
-    next(error)
+    throw error;
   }
   try {
     const user = await User.findById(userId);
@@ -60,6 +60,11 @@ exports.deleteUser = async (req, res, next) => {
 exports.getUserStatus = async (req, res, next) => {
   const { userId } = req.body;
 
+  if (!req.userId && userId !== req.userId) {
+    const error = new Error('Unauthorized!');
+    error.statusCode = 403;
+    throw error;
+  }
   try {
     const user = await User.findById(userId);
     if (!user) {

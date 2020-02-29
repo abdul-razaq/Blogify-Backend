@@ -48,9 +48,8 @@ exports.signup = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-  // extract the user details
   const { email, password } = req.body;
-  // check to see if the user has an account by checking for existing email address
+
   let loadedUser;
   try {
     const user = await User.findOne({ email });
