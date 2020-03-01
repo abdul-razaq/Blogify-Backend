@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const bcrypt = require('bcryptjs');
 
 const UserSchema = new Schema({
   firstname: {
@@ -44,5 +45,29 @@ const UserSchema = new Schema({
 
   posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
 });
+
+UserSchema.virtual('fullName').get(function() {
+  const user = this;
+  return `${user.firstname} ${user.lastname}`;
+});
+
+UserSchema.pre('save', async function(next) {
+  const user = this;
+  try {
+    const hashedPassword = await bcrypt.hash(user.password, 12);
+    user.password = hashedPassword;
+    next();
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+});
+
+UserSchema.methods.confirmPassword = function(password) {
+  const user = this;
+  return bcrypt.compare(password, user.password);
+};
 
 module.exports = mongoose.model('User', UserSchema);

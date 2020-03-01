@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-const { Schema } = mongoose.Schema;
 
-const PostSchema = new Schema(
+const PostSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -17,14 +16,15 @@ const PostSchema = new Schema(
       trim: true,
     },
 
-    creator: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
-
     category: {
       type: String,
       required: false,
+      default: null,
+    },
+
+    creator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     },
   },
   { timestamps: true }

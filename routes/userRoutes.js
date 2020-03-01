@@ -1,4 +1,5 @@
 const express = require('express');
+const { body } = require('express-validator');
 
 const userControllers = require('../controllers/user');
 const requireLogin = require('../middlewares/requireLogin');
@@ -12,5 +13,21 @@ router.delete('/:userId', requireLogin, userControllers.deleteUser);
 router.get('/status', requireLogin, userControllers.getUserStatus);
 
 router.patch('/status', requireLogin, userControllers.updateUserStatus);
+
+router.patch(
+  '/update',
+  requireLogin,
+  [
+    body('firstname', 'firstname is required'),
+    body('lastname', 'firstname is required'),
+    body('email', 'email is required')
+      .isEmail()
+      .normalizeEmail({ all_lowercase: true }),
+    body('oldPassword').isEmpty(),
+    body('newPassword').isEmpty(),
+    body('confirmNewPassword').isEmpty(),
+  ],
+  userControllers.updateUser
+);
 
 module.exports = router;

@@ -27,13 +27,11 @@ exports.signup = async (req, res, next) => {
     return next(error);
   }
   try {
-    const hashedPassword = await bcrypt.hash(password, 12);
-
     const user = new User({
       firstname,
       lastname,
       email,
-      password: hashedPassword,
+      password,
       isActive: true,
       isAdmin: true,
     });
@@ -54,13 +52,13 @@ exports.login = async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      const error = new Error('No user with this email address registered');
+      const error = new Error('No user with this email address');
       error.statusCode = 422;
       throw error;
     }
+    // if the user have an account, compare the password entered using the comparePassword method defined in the userSchema
     loadedUser = user;
-    // if the user have an account, compare the password entered
-    const isMatched = await bcrypt.compare(password, user.password);
+    const isMatched = await user.confirmPassword(password);
     if (isMatched) {
       // Generate jsonwebtoken
       const token = jsonwebtoken.sign(

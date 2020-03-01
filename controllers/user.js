@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 exports.getUser = async (req, res, next) => {
   const { userId } = req.params;
@@ -24,6 +25,44 @@ exports.getUser = async (req, res, next) => {
         isActive: user.isActive,
       },
     });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.updateUser = async (req, res, next) => {
+  const userId = req.userId;
+  if (!userId) {
+    const error = new Error('Not Authenticated');
+    error.statusCode = 422;
+    next(error);
+  }
+  const {
+    firstname,
+    lastname,
+    email,
+    oldPassword,
+    newPassword,
+    confirmNewPassword,
+  } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (oldPassword && newPassword && confirmNewPassword) {
+      const isMatched = user.confirmPassword(oldPassword, user.password);
+      if (!isMatched) {
+        const error = new Error('Passwords do not match');
+        error.statusCode = 422;
+        throw error;
+      }
+      const newHashedPassword = await bcrypt.hash(newPassword, 12);
+      User.findByIdAndUpdate(userId, {
+        $set: { firstname, lastname, email, password: newHashedPassword },
+      });
+    }
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;

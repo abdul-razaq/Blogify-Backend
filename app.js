@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 
 const authRouters = require('./routes/authRoutes');
 const userRouters = require('./routes/userRoutes');
+const postRouters = require('./routes/postRoutes');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use((req, res, next) => {
 // Register Routes Middlewares
 app.use('/auth', authRouters);
 app.use('/users', userRouters);
+app.use(postRouters);
 
 // Error 404 middleware
 app.use((req, res) => {
