@@ -44,6 +44,42 @@ exports.createPost = async (req, res, next) => {
 	}
 };
 
+exports.editPost = async (req, res, next) => {
+	const userId = req.userId;
+	const postId = req.params.id;
+	if (!userId) {
+		const error = new Error('Not Authenticated');
+		error.statusCode = 403;
+		next(error);
+	}
+	const { category, title, content } = req.body;
+	try {
+		const post = await Post.findOne({ _id: postId, creator: userId });
+		if (!post) {
+			const error = new Error('Post not found');
+			error.statusCode = 404;
+			throw error;
+		}
+		const editedPost = {
+			category,
+			title,
+			content,
+		};
+    const prevPost = await Post.findOne({ title: editedPost.title });
+    if (prevPost) {
+      const error = new Error('Post with this title already exists')
+      error.statusCode = 409;
+      throw error;
+    }
+		await Post.findByIdAndUpdate(postId, editedPost);
+		res.status(200).json({ message: 'Post updated' });
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500;
+		}
+		next(error);
+	}
+};
 
 exports.getPost = async (req, res, next) => {
 	const userId = req.userId;
@@ -82,15 +118,14 @@ exports.getPost = async (req, res, next) => {
 exports.getAllPosts = async (req, res, next) => {
 	const userId = req.userId;
 	if (!userId) {
-		const error = new Error('Not Authenticated');
+		const error = new Error('Not Authenticated!');
 		error.statusCode = 403;
 		next(error);
 	}
 	try {
 		const user = await User.findById(userId);
 		const posts = await user.populate('posts').execPopulate();
-		console.log(posts);
-		if (posts.length === 0) {
+		if (posts.posts.length === 0) {
 			return res.status(417).json({ message: 'This user has no post yet' });
 		}
 		res.status(200).json({ message: 'Posts found', posts: posts.posts });

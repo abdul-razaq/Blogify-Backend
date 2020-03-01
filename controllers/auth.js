@@ -67,7 +67,7 @@ exports.login = async (req, res, next) => {
           userId: loadedUser._id,
         },
         'thisismysecret',
-        { expiresIn: '1h' }
+        { expiresIn: '10h' }
       );
       // send a response that user is authenticated
       res.status(200).json({
@@ -77,7 +77,7 @@ exports.login = async (req, res, next) => {
       });
     } else {
       const error = new Error('email or password is incorrect!');
-      error.statusCode = 422;
+      error.statusCode = 401;
       throw error;
     }
   } catch (error) {

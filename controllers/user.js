@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs');
 
 const { validationResult } = require('express-validator');
 
@@ -73,13 +72,12 @@ exports.updateUser = async (req, res, next) => {
 			user.email = email;
 			user.password = newPassword;
 			user.save();
-			res.status(201).json({ message: 'User updated successfully!' });
+			res.status(200).json({ message: 'User updated successfully!' });
 		}
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 500;
 		}
-		console.log(error);
 		next(error);
 	}
 };
@@ -99,6 +97,7 @@ exports.deleteUser = async (req, res, next) => {
 			error.statusCode = 404;
 			throw error;
 		}
+		// TODO: Remove all posts belonging to a user after the user is deleted
 		await User.findByIdAndDelete({ _id: req.userId });
 		res.status(200).json({ message: 'user deleted successfully!' });
 	} catch (error) {
@@ -124,7 +123,6 @@ exports.getUserStatus = async (req, res, next) => {
 			error.statusCode = 404;
 			throw error;
 		}
-		// send the status field back to the client
 		res
 			.status(200)
 			.json({ message: 'User status found', userStatus: user.isActive });
@@ -137,9 +135,7 @@ exports.getUserStatus = async (req, res, next) => {
 };
 
 exports.updateUserStatus = async (req, res, next) => {
-	// get the userId
 	const { userId, newStatus } = req.body;
-	// check to see if a user with that id exists
 	try {
 		const user = await User.findById(userId);
 		if (!user) {
@@ -147,7 +143,6 @@ exports.updateUserStatus = async (req, res, next) => {
 			error.statusCode = 404;
 			throw error;
 		}
-		// update the status field
 		user.isActive = newStatus;
 		await user.save();
 		res

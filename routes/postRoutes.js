@@ -2,7 +2,7 @@ const express = require('express');
 const { body } = require('express-validator');
 
 const requireLogin = require('../middlewares/requireLogin');
-const postController = require('../controllers/post');
+const postControllers = require('../controllers/post');
 
 const router = express.Router();
 
@@ -18,13 +18,30 @@ router.put(
 			.isString()
 			.trim(),
 	],
-	postController.createPost
+	postControllers.createPost
 );
 
-router.get('/feeds', postController.getFeeds);
+router.get('/feeds', postControllers.getFeeds);
 
-router.get('/posts', requireLogin, postController.getAllPosts);
+router.get('/posts', requireLogin, postControllers.getAllPosts);
 
-router.get('/posts/:id', requireLogin, postController.getPost);
+router.get('/posts/:id', requireLogin, postControllers.getPost);
+
+router.patch(
+	'/posts/:id',
+	requireLogin,
+	[
+		body('category')
+			.notEmpty()
+			.isLength({ min: 5, max: 10 }),
+		body('title')
+			.notEmpty()
+			.isLength({ min: 5, max: 10 }),
+		body('content')
+			.notEmpty()
+			.isLength({ min: 10 }),
+	],
+	postControllers.editPost
+);
 
 module.exports = router;
