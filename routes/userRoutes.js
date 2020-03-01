@@ -23,9 +23,11 @@ router.patch(
     body('email', 'email is required')
       .isEmail()
       .normalizeEmail({ all_lowercase: true }),
-    body('oldPassword').isEmpty(),
-    body('newPassword').isEmpty(),
-    body('confirmNewPassword').isEmpty(),
+    body('oldPassword'),
+    body('newPassword')
+      .custom((value, {req}) => {
+        return value === req.body.confirmNewPassword
+      })
   ],
   userControllers.updateUser
 );
