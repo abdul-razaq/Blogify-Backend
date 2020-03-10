@@ -1,13 +1,11 @@
-const express = require('express');
+const router = require('express').Router();
 const { body } = require('express-validator');
 
 const requireLogin = require('../middlewares/requireLogin');
 const postControllers = require('../controllers/post');
 
-const router = express.Router();
-
 router.put(
-	'/post',
+	'/posts',
 	requireLogin,
 	[
 		body('title', 'post title is required')
@@ -20,8 +18,6 @@ router.put(
 	],
 	postControllers.createPost
 );
-
-router.get('/posts/:id', requireLogin, postControllers.getPost);
 
 router.patch(
 	'/posts/:id',
@@ -39,6 +35,10 @@ router.patch(
 	],
 	postControllers.editPost
 );
+
+router.delete('/posts/:id', requireLogin, postControllers.deletePost);
+
+router.get('/posts/:id', requireLogin, postControllers.getPost);
 
 router.get('/posts', requireLogin, postControllers.getAllPosts);
 

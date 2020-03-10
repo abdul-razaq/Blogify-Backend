@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const Post = require('../models/Post');
 const User = require('../models/User');
 
@@ -81,26 +83,33 @@ exports.editPost = async (req, res, next) => {
 	}
 };
 
-// Delete a post
 exports.deletePost = async (req, res, next) => {
 	const userId = req.userId;
-	const postId = req.params.postId;
+	const postId = req.params.id;
 	if (!userId) {
 		const error = new Error('User not Authenticated');
 		error.statusCode = 403;
 		next(error);
 	}
 	try {
-		const postToDelete = await Post.find({ postId, creator: userId });
+		const postToDelete = await Post.find({ _id: postId, creator: userId });
 		if (!postToDelete) {
 			const error = new Error('Post not found');
 			error.statusCode = 404;
 			throw error;
 		}
-		await Post.findByIdAndDelete({ postId });
+		const result = await Post.findByIdAndRemove(postId);
+		if (!result) {
+			const error = new Error('Post not found');
+			error.statusCode = 404;
+			throw error;
+		}
+		const user = await User.findById(userId);
+		user.posts.pull(postId);
+		await user.save();
 		res.status(200).json({ message: 'Post deleted!' });
 	} catch (error) {
-		if (error.statusCode) {
+		if (!error.statusCode) {
 			error.statusCode = 500;
 		}
 		next(error);
