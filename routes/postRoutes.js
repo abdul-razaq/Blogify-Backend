@@ -38,7 +38,7 @@ router.patch(
 
 router.delete('/posts/:id', requireLogin, postControllers.deletePost);
 
-router.get('/posts/:id', requireLogin, postControllers.getPost);
+router.get('/posts/:id', requireLogin, postControllers.getAPost);
 
 router.get('/posts', requireLogin, postControllers.getAllPosts);
 

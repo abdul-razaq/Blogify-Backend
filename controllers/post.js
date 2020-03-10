@@ -1,5 +1,3 @@
-const mongoose = require('mongoose');
-
 const Post = require('../models/Post');
 const User = require('../models/User');
 
@@ -116,7 +114,7 @@ exports.deletePost = async (req, res, next) => {
 	}
 };
 
-exports.getPost = async (req, res, next) => {
+exports.getAPost = async (req, res, next) => {
 	const userId = req.userId;
 	const postId = req.params.id;
 	if (!userId) {
@@ -125,7 +123,9 @@ exports.getPost = async (req, res, next) => {
 		next(error);
 	}
 	try {
-		const post = await Post.findOne({ _id: postId, creator: userId });
+		const post = await Post.findOne({ _id: postId, creator: userId }).select(
+			'-__v -creator'
+		);
 		if (!post) {
 			const error = new Error('Post not found!');
 			error.statusCode = 404;
@@ -133,14 +133,7 @@ exports.getPost = async (req, res, next) => {
 		}
 		res.status(200).json({
 			message: 'Post found',
-			post: {
-				_id: post._id,
-				category: post.category,
-				title: post.title,
-				content: post.content,
-				createdAt: post.createdAt,
-				updatedAt: post.updatedAt,
-			},
+			post,
 		});
 	} catch (error) {
 		if (!error.statusCode) {
@@ -159,7 +152,9 @@ exports.getAllPosts = async (req, res, next) => {
 	}
 	try {
 		const user = await User.findById(userId);
-		const posts = await user.populate('posts').execPopulate();
+		const posts = await user
+			.populate({ path: 'posts', select: '-creator -__v' })
+			.execPopulate();
 		if (posts.posts.length === 0) {
 			return res.status(417).json({ message: 'This user has no post yet' });
 		}
