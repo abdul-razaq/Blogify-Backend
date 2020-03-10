@@ -171,3 +171,27 @@ exports.getAllPosts = async (req, res, next) => {
 		next(error);
 	}
 };
+
+exports.getFeeds = async (req, res, next) => {
+	const { page: currentPage = 1 } = req.query;
+	const postsPerPage = 2;
+	try {
+		const posts = await Post.find()
+			.select('-__v -_id')
+			.sort({ _id: -1 })
+			.skip((currentPage - 1) * postsPerPage)
+			.limit(postsPerPage)
+			.populate({ path: 'creator', select: 'firstname lastname email' });
+		if (!posts) {
+			const error = new Error('No more posts');
+			error.statusCode = 404;
+			throw error;
+		}
+		res.status(200).json({ message: 'Posts', posts });
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500;
+		}
+		next(error);
+	}
+};

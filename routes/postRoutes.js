@@ -42,4 +42,6 @@ router.get('/posts/:id', requireLogin, postControllers.getPost);
 
 router.get('/posts', requireLogin, postControllers.getAllPosts);
 
+router.get('/feeds', postControllers.getFeeds);
+
 module.exports = router;

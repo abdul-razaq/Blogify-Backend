@@ -97,6 +97,6 @@ exports.logout = (req, res, next) => {
     throw error;
   }
   // if the user is authenticated, delete the token in the header
-  delete req.headers.authorization;
+  req.headers.authorization = '';
   res.status(200).json({ message: 'Logged out successfully' });
 };

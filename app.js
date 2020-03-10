@@ -12,11 +12,10 @@ const app = express();
 
 // CONSTANTS
 const MONGODB_URI = 'mongodb://127.0.0.1:27017/blogify';
-const PORT = process.env.port || 3000;
-
+app.set('port', 3000);
 // TODO: Add request logger middleware
 app.use((req, res, next) => {
-	const {url, ip, httpVersion, method} = req;
+	const { url, ip, httpVersion, method } = req;
 	console.log(method, ip, url, httpVersion);
 	next();
 });
@@ -44,8 +43,9 @@ mongoose
 	})
 	.then(() => {
 		console.log('Application connected to the database successfully');
-		app.listen(PORT, () => {
-			console.log('Application listening on port ' + PORT);
+		const port = app.get('port');
+		app.listen(port, () => {
+			console.log('Application listening on port ' + port);
 		});
 	})
 	.catch(err => {
