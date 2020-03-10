@@ -8,7 +8,7 @@ exports.getUser = async (req, res, next) => {
 	if (!req.userId && userId !== req.userId) {
 		const error = new Error('Unauthorized!');
 		error.statusCode = 403;
-		throw error;
+		next(error);
 	}
 	try {
 		const user = await User.findById(userId);

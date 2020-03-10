@@ -1,10 +1,12 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
 const authRouters = require('./routes/authRoutes');
 const userRouters = require('./routes/userRoutes');
 const postRouters = require('./routes/postRoutes');
+const cors = require('./middlewares/cors');
+const generalError = require('./middlewares/generalError');
+const error404 = require('./middlewares/error404');
 
 const app = express();
 
@@ -12,21 +14,18 @@ const app = express();
 const MONGODB_URI = 'mongodb://127.0.0.1:27017/blogify';
 const PORT = process.env.port || 3000;
 
+// TODO: Add request logger middleware
+app.use((req, res, next) => {
+	const {url, ip, httpVersion, method} = req;
+	console.log(method, ip, url, httpVersion);
+	next();
+});
 // Middleware configurations
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 // General middlewares
 // CORS middleware
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'POST, PUT, PATCH, GET, DELETE'
-  );
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
+app.use(cors);
 
 // Register Routes Middlewares
 app.use('/auth', authRouters);
@@ -34,31 +33,21 @@ app.use('/users', userRouters);
 app.use(postRouters);
 
 // Error 404 middleware
-app.use((req, res) => {
-  res.status(404).json({ message: 'Page not found' });
-});
-
+app.use(error404);
 // General error handling middleware
-app.use((error, req, res, next) => {
-  const {
-    statusCode: status = 500,
-    message = 'An error has occurred',
-    data = null,
-  } = error;
-  res.status(status).json({ message, data });
-});
+app.use(generalError);
 
 mongoose
-  .connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log('Application connected to the database successfully');
-    app.listen(PORT, () => {
-      console.log('Application listening on port ' + PORT);
-    });
-  })
-  .catch(err => {
-    console.log('Error connecting to database');
-  });
+	.connect(MONGODB_URI, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+	.then(() => {
+		console.log('Application connected to the database successfully');
+		app.listen(PORT, () => {
+			console.log('Application listening on port ' + PORT);
+		});
+	})
+	.catch(err => {
+		console.log('Error connecting to the database');
+	});

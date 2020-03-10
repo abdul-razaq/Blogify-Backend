@@ -21,10 +21,6 @@ router.put(
 	postControllers.createPost
 );
 
-router.get('/feeds', postControllers.getFeeds);
-
-router.get('/posts', requireLogin, postControllers.getAllPosts);
-
 router.get('/posts/:id', requireLogin, postControllers.getPost);
 
 router.patch(
@@ -43,5 +39,7 @@ router.patch(
 	],
 	postControllers.editPost
 );
+
+router.get('/posts', requireLogin, postControllers.getAllPosts);
 
 module.exports = router;
