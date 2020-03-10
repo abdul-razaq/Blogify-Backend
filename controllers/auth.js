@@ -1,7 +1,7 @@
 const { validationResult } = require('express-validator');
-const jsonwebtoken = require('jsonwebtoken');
 
 const User = require('../models/User');
+const generateJWT = require('../utils/generateJWT');
 
 exports.signup = async (req, res, next) => {
 	const errors = validationResult(req);
@@ -35,7 +35,9 @@ exports.signup = async (req, res, next) => {
 			isAdmin: true,
 		});
 		await user.save();
-		res.status(201).json({ message: 'User created', userId: user._id });
+		const token = generateJWT(email, user._id, 'thisismysecret', '10h');
+
+		res.status(201).json({ message: 'User created', userId: user._id, token });
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 500;
@@ -62,14 +64,7 @@ exports.login = async (req, res, next) => {
 			throw error;
 		}
 		// Generate jsonwebtoken
-		const token = jsonwebtoken.sign(
-			{
-				email: loadedUser.email,
-				userId: loadedUser._id,
-			},
-			'thisismysecret',
-			{ expiresIn: '10h' }
-		);
+		const token = generateJWT(email, user._id, 'thisismysecret', '10h');
 		res.status(200).json({
 			message: 'Authenticated successfully',
 			token,
