@@ -54,7 +54,7 @@ UserSchema.virtual('fullName').get(function() {
 UserSchema.pre('save', async function(next) {
   const user = this;
   try {
-    const hashedPassword = await bcrypt.hash(user.password, 12);
+    const hashedPassword = await bcrypt.hash(user.password, 10);
     user.password = hashedPassword;
     next();
   } catch (error) {

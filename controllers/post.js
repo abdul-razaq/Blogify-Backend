@@ -114,6 +114,28 @@ exports.deletePost = async (req, res, next) => {
 	}
 };
 
+// Delete all posts
+exports.deleteAllPosts = async (req, res, next) => {
+	const userId = req.userId;
+	if (!userId) {
+		const error = new Error('User not authenticated');
+		error.statusCode = 403;
+		next(error);
+	}
+	try {
+		const user = await User.findById(userId);
+		user.posts = [];
+		await user.save();
+		await Post.deleteMany({ creator: userId });
+		res.status(200).json({ message: 'All posts deleted' });
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500;
+		}
+		next(error);
+	}
+};
+
 exports.getAPost = async (req, res, next) => {
 	const userId = req.userId;
 	const postId = req.params.id;
