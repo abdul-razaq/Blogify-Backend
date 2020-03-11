@@ -1,19 +1,21 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
-const authRouters = require('./routes/authRoutes');
-const userRouters = require('./routes/userRoutes');
-const postRouters = require('./routes/postRoutes');
+const authRouters = require('./routes/authRouters');
+const userRouters = require('./routes/userRouters');
+const postRouters = require('./routes/postRouters');
 const cors = require('./middlewares/cors');
 const generalError = require('./middlewares/generalError');
 const error404 = require('./middlewares/error404');
+const adminRouters = require('./routes/adminRouters');
 
 const app = express();
-
 // CONSTANTS
 const MONGODB_URI = 'mongodb://127.0.0.1:27017/blogify';
+
 app.set('port', 3000);
-// TODO: Add request logger middleware
+
+// TODO: Add request logger middleware and cors middleware
 app.use((req, res, next) => {
 	const { url, ip, httpVersion, method } = req;
 	console.log(method, ip, url, httpVersion);
@@ -26,10 +28,11 @@ app.use(express.urlencoded({ extended: false }));
 // CORS middleware
 app.use(cors);
 
-// Register Routes Middlewares
+// Register Routes Mini-Application Middlewares
 app.use('/auth', authRouters);
 app.use('/users', userRouters);
 app.use(postRouters);
+app.use('/admin', adminRouters);
 
 // Error 404 middleware
 app.use(error404);

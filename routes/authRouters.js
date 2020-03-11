@@ -1,10 +1,8 @@
-const express = require('express');
+const authRoutes = require('express').Router();
 const { body } = require('express-validator');
 
 const authControllers = require('../controllers/auth');
 const requireLogin = require('../middlewares/requireLogin');
-
-const router = express.Router();
 
 const signUpValidationMiddleware = [
 	body('firstname', 'Firstname is required')
@@ -29,10 +27,10 @@ const signUpValidationMiddleware = [
 		}
 	),
 ];
-router.put('/signup', signUpValidationMiddleware, authControllers.signup);
+authRoutes.put('/signup', signUpValidationMiddleware, authControllers.signup);
 
-router.post('/login', authControllers.login);
+authRoutes.post('/login', authControllers.login);
 
-router.post('/logout', requireLogin, authControllers.logout);
+authRoutes.post('/logout', requireLogin, authControllers.logout);
 
-module.exports = router;
+module.exports = authRoutes;

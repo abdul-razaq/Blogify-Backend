@@ -190,7 +190,7 @@ exports.getAllPosts = async (req, res, next) => {
 };
 
 exports.getFeeds = async (req, res, next) => {
-	const { page: currentPage = 1 } = req.query;
+	const { page: currentPage = '1' } = req.query;
 	const postsPerPage = 2;
 	try {
 		const posts = await Post.find()
@@ -199,12 +199,12 @@ exports.getFeeds = async (req, res, next) => {
 			.skip((currentPage - 1) * postsPerPage)
 			.limit(postsPerPage)
 			.populate({ path: 'creator', select: 'firstname lastname email' });
-		if (!posts) {
+		if (!posts.length) {
 			const error = new Error('No more posts');
 			error.statusCode = 404;
 			throw error;
 		}
-		res.status(200).json({ message: 'Posts', posts });
+		res.status(200).json({ message: 'Posts', currentPage, posts });
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 500;

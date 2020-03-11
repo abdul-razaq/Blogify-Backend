@@ -1,20 +1,19 @@
-const express = require('express');
+const userRoutes = require('express').Router();
 const { body } = require('express-validator');
 
 const userControllers = require('../controllers/user');
 const requireLogin = require('../middlewares/requireLogin');
 
-const router = express.Router();
 
-router.get('/:userId', requireLogin, userControllers.getUser);
+userRoutes.get('/:userId', requireLogin, userControllers.getUser);
 
-router.delete('/:userId', requireLogin, userControllers.deleteUser);
+userRoutes.delete('/:userId', requireLogin, userControllers.deleteUser);
 
-router.get('/status', requireLogin, userControllers.getUserStatus);
+userRoutes.get('/status', requireLogin, userControllers.getUserStatus);
 
-router.patch('/status', requireLogin, userControllers.updateUserStatus);
+userRoutes.patch('/status', requireLogin, userControllers.updateUserStatus);
 
-router.patch(
+userRoutes.patch(
   '/update',
   requireLogin,
   [
@@ -32,4 +31,4 @@ router.patch(
   userControllers.updateUser
 );
 
-module.exports = router;
+module.exports = userRoutes;

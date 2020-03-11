@@ -1,10 +1,10 @@
-const router = require('express').Router();
+const postRoutes = require('express').Router();
 const { body } = require('express-validator');
 
 const requireLogin = require('../middlewares/requireLogin');
 const postControllers = require('../controllers/post');
 
-router.put(
+postRoutes.put(
 	'/posts',
 	requireLogin,
 	[
@@ -19,7 +19,7 @@ router.put(
 	postControllers.createPost
 );
 
-router.patch(
+postRoutes.patch(
 	'/posts/:id',
 	requireLogin,
 	[
@@ -36,14 +36,14 @@ router.patch(
 	postControllers.editPost
 );
 
-router.delete('/posts/:id', requireLogin, postControllers.deletePost);
+postRoutes.delete('/posts/:id', requireLogin, postControllers.deletePost);
 
-router.delete('/posts', requireLogin, postControllers.deleteAllPosts);
+postRoutes.delete('/posts', requireLogin, postControllers.deleteAllPosts);
 
-router.get('/posts/:id', requireLogin, postControllers.getAPost);
+postRoutes.get('/posts/:id', requireLogin, postControllers.getAPost);
 
-router.get('/posts', requireLogin, postControllers.getAllPosts);
+postRoutes.get('/posts', requireLogin, postControllers.getAllPosts);
 
-router.get('/feeds', postControllers.getFeeds);
+postRoutes.get('/feeds', postControllers.getFeeds);
 
-module.exports = router;
+module.exports = postRoutes;
