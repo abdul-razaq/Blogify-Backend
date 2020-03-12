@@ -20,6 +20,7 @@ const PostSchema = new mongoose.Schema(
       type: String,
       required: false,
       default: null,
+      lowercase: true
     },
 
     creator: {

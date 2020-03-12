@@ -190,25 +190,36 @@ exports.getAllPosts = async (req, res, next) => {
 };
 
 exports.getFeeds = async (req, res, next) => {
-	const { page: currentPage = '1' } = req.query;
-	const postsPerPage = 2;
+	const { page: currentPage = '1', category, limit } = req.query;
+	const postsPerPage = parseInt(limit) || 2;
+
+	let posts;
 	try {
-		const posts = await Post.find()
-			.select('-__v -_id')
-			.sort({ _id: -1 })
-			.skip((currentPage - 1) * postsPerPage)
-			.limit(postsPerPage)
-			.populate({ path: 'creator', select: 'firstname lastname email' });
+		if (category) {
+			posts = await Post.find({ category: category.toLowerCase() })
+				.select('-__v -_id')
+				.sort({ _id: -1 })
+				.skip((currentPage - 1) * postsPerPage)
+				.limit(postsPerPage)
+				.populate({ path: 'creator', select: 'firstname lastname email' });
+		} else {
+			posts = await Post.find()
+				.select('-__v -_id')
+				.sort({ _id: -1 })
+				.skip((currentPage - 1) * postsPerPage)
+				.limit(postsPerPage)
+				.populate({ path: 'creator', select: 'firstname lastname email' });
+		}
 		if (!posts.length) {
 			const error = new Error('No more posts');
 			error.statusCode = 404;
 			throw error;
 		}
-		res.status(200).json({ message: 'Posts', currentPage, posts });
+		res.status(200).json({ message: 'Posts retrieved', currentPage, posts });
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 500;
 		}
-		next(error);
+		return next(error);
 	}
 };
