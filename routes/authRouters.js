@@ -33,4 +33,25 @@ authRoutes.post('/login', authControllers.login);
 
 authRoutes.post('/logout', requireLogin, authControllers.logout);
 
+const updatePasswordValidation = [
+	body('old_password', 'Old Password is required')
+		.isAlphanumeric()
+		.isLength({ min: 8 }),
+	body('new_password', 'New password is required')
+		.isAlphanumeric()
+		.isLength({ min: 8 }),
+	body('confirm_new_password', 'Confirm new password')
+		.isAlphanumeric()
+		.isLength({ min: 8 })
+		.custom((value, { req }) => {
+			return value === req.body.new_password;
+		}).withMessage('passwords do not match'),
+];
+authRoutes.post(
+	'/password/update',
+	requireLogin,
+	updatePasswordValidation,
+	authControllers.updatePassword
+);
+
 module.exports = authRoutes;

@@ -32,7 +32,6 @@ exports.signup = async (req, res, next) => {
 			email,
 			password,
 			isActive: true,
-			isAdmin: true,
 		});
 		await user.save();
 		const token = generateJWT(email, user._id, 'thisismysecret', '10h');
@@ -89,4 +88,38 @@ exports.logout = (req, res, next) => {
 	// if the user is authenticated, delete the token in the header
 	req.headers.authorization = '';
 	res.status(200).json({ message: 'Logged out successfully' });
+};
+
+exports.updatePassword = async (req, res, next) => {
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const error = new Error('Validation failed, check input');
+		error.statusCode = 422;
+		error.data = errors.array();
+		next(error);
+	}
+	const userId = req.userId;
+	if (!userId) {
+		const error = new Error('Not Authenticated');
+		error.statusCode = 422;
+		next(error);
+	}
+	const { old_password, new_password } = req.body;
+	try {
+		const user = await User.findById(userId);
+		const isMatched = await user.confirmPassword(old_password);
+		if (!isMatched) {
+			const error = new Error('Enter correct password!');
+			error.statusCode = 403;
+			throw error;
+		}
+		user.password = new_password;
+		await user.save();
+		res.status(200).json({ message: 'Password changed!' });
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 403;
+		}
+		next(error);
+	}
 };

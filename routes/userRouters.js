@@ -4,6 +4,7 @@ const { body } = require('express-validator');
 const userControllers = require('../controllers/user');
 const requireLogin = require('../middlewares/requireLogin');
 
+userRoutes.get('/profile', requireLogin, userControllers.userProfile);
 
 userRoutes.get('/:userId', requireLogin, userControllers.getUser);
 

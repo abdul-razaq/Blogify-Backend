@@ -97,8 +97,7 @@ exports.deleteUser = async (req, res, next) => {
 			error.statusCode = 404;
 			throw error;
 		}
-		// TODO: Remove all posts belonging to a user after the user is deleted
-		await User.findByIdAndDelete({ _id: req.userId });
+		await User.remove({ _id: req.userId });
 		res.status(200).json({ message: 'user deleted successfully!' });
 	} catch (error) {
 		if (!error.statusCode) {
@@ -153,5 +152,25 @@ exports.updateUserStatus = async (req, res, next) => {
 			error.statusCode = 500;
 		}
 		next(error);
+	}
+};
+
+exports.userProfile = async (req, res, next) => {
+	const userId = req.userId;
+	if (!userId) {
+		const error = new Error('Not Authenticated');
+		error.statusCode = 422;
+		return next(error);
+	}
+	try {
+		const userProfile = await User.findOne({ _id: userId }).select(
+			'-password -__v -posts -_id -isActive'
+		);
+		res.status(200).json({ message: 'User profile', data: userProfile });
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 422;
+		}
+		return next(error);
 	}
 };

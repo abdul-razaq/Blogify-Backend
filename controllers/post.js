@@ -11,8 +11,8 @@ exports.createPost = async (req, res, next) => {
 		error.data = errors.array();
 		next(error);
 	}
-	const { title, content, category } = req.body;
 	const userId = req.userId;
+	const { title, content, category } = req.body;
 	if (!userId) {
 		const error = new Error('Not Authenticated!');
 		error.statusCode = 422;

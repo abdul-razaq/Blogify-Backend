@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const bcrypt = require('bcryptjs');
 
+const Post = require('../models/Post');
+
 const UserSchema = new Schema({
 	firstname: {
 		type: String,
@@ -27,7 +29,6 @@ const UserSchema = new Schema({
 		type: String,
 		required: true,
 		allowNull: false,
-		select: false,
 	},
 
 	isActive: {
@@ -35,13 +36,6 @@ const UserSchema = new Schema({
 		required: true,
 		allowNull: false,
 		default: true,
-	},
-
-	isAdmin: {
-		type: Boolean,
-		required: true,
-		allowNull: false,
-		default: false,
 	},
 
 	posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
@@ -67,6 +61,22 @@ UserSchema.pre('save', async function(next) {
 		}
 	}
 });
+
+UserSchema.pre(
+	[
+		'remove',
+		'findByIdAndDelete',
+		'findByIdAndRemove',
+		'findOneAndDelete',
+		'findOneAndRemove',
+		'deleteOne',
+	],
+	async function(next) {
+		const user = this;
+		await Post.deleteMany({ creator: user._id });
+		next();
+	}
+);
 
 UserSchema.methods.confirmPassword = function(password) {
 	const user = this;
