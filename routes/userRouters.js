@@ -6,6 +6,8 @@ const requireLogin = require('../middlewares/requireLogin');
 
 userRoutes.get('/profile', requireLogin, userControllers.userProfile);
 
+userRoutes.delete('/delete', requireLogin, userControllers.deleteAccount);
+
 userRoutes.get('/:userId', requireLogin, userControllers.getUser);
 
 userRoutes.delete('/:userId', requireLogin, userControllers.deleteUser);

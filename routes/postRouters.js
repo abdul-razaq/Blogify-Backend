@@ -9,7 +9,7 @@ postRoutes.put(
 	requireLogin,
 	[
 		body('title', 'post title is required')
-			.isLength({ min: 2, max: 20 })
+			.isLength({ min: 5 })
 			.trim()
 			.isString(),
 		body('content', 'post content is required')

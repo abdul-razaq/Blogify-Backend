@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Post = require('../models/Post');
 
 const { validationResult } = require('express-validator');
 
@@ -166,7 +167,30 @@ exports.userProfile = async (req, res, next) => {
 		const userProfile = await User.findOne({ _id: userId }).select(
 			'-password -__v -posts -_id -isActive'
 		);
+		if (!userProfile) {
+			res.status(404).json({ message: 'No user found' });
+		}
 		res.status(200).json({ message: 'User profile', data: userProfile });
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 422;
+		}
+		return next(error);
+	}
+};
+
+exports.deleteAccount = async (req, res, next) => {
+	const userId = req.userId;
+	if (!userId) {
+		const error = new Error('Not Authenticated');
+		error.statusCode = 422;
+		return next(error);
+	}
+	try {
+		const removePosts = await Post.deleteMany({ creator: userId });
+		console.log(removePosts);
+		await User.findByIdAndDelete(userId);
+		res.status(200).json({ message: 'User deleted successfully!' });
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 422;

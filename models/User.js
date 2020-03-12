@@ -62,22 +62,6 @@ UserSchema.pre('save', async function(next) {
 	}
 });
 
-UserSchema.pre(
-	[
-		'remove',
-		'findByIdAndDelete',
-		'findByIdAndRemove',
-		'findOneAndDelete',
-		'findOneAndRemove',
-		'deleteOne',
-	],
-	async function(next) {
-		const user = this;
-		await Post.deleteMany({ creator: user._id });
-		next();
-	}
-);
-
 UserSchema.methods.confirmPassword = function(password) {
 	const user = this;
 	return bcrypt.compare(password, user.password);
