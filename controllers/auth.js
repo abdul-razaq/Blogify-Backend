@@ -11,7 +11,7 @@ exports.signup = async (req, res, next) => {
 		error.data = errors.array();
 		return next(error);
 	}
-	const { firstname, lastname, email, password } = req.body;
+	const { firstname, lastname, email, password, username, bio } = req.body;
 
 	try {
 		const userDoc = await User.findOne({ email });
@@ -30,7 +30,9 @@ exports.signup = async (req, res, next) => {
 			firstname,
 			lastname,
 			email,
+			username,
 			password,
+			bio,
 			isActive: true,
 		});
 		await user.save();

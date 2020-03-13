@@ -193,7 +193,7 @@ exports.getFeeds = async (req, res, next) => {
 	const { page: currentPage = '1', category, limit } = req.query;
 	const postsPerPage = parseInt(limit) || 2;
 
-	let posts;
+	let posts, total;
 	try {
 		if (category) {
 			posts = await Post.find({ category: category.toLowerCase() })
@@ -202,6 +202,7 @@ exports.getFeeds = async (req, res, next) => {
 				.skip((currentPage - 1) * postsPerPage)
 				.limit(postsPerPage)
 				.populate({ path: 'creator', select: 'firstname lastname email' });
+			total = await Post.countDocuments({ category: category.toLowerCase() });
 		} else {
 			posts = await Post.find()
 				.select('-__v -_id')
@@ -209,13 +210,22 @@ exports.getFeeds = async (req, res, next) => {
 				.skip((currentPage - 1) * postsPerPage)
 				.limit(postsPerPage)
 				.populate({ path: 'creator', select: 'firstname lastname email' });
+			total = await Post.countDocuments({});
 		}
 		if (!posts.length) {
 			const error = new Error('No more posts');
 			error.statusCode = 404;
 			throw error;
 		}
-		res.status(200).json({ message: 'Posts retrieved', currentPage, posts });
+		res
+			.status(200)
+			.json({
+				message: 'Posts retrieved',
+				currentPage,
+				posts,
+				postsRemaining: total - (currentPage * postsPerPage),
+				totalPosts: total,
+			});
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 500;
@@ -223,3 +233,10 @@ exports.getFeeds = async (req, res, next) => {
 		return next(error);
 	}
 };
+
+exports.searchPost = (req, res, next) => {
+	// receive the user search query
+	// check the received user query against the document title in the database
+	// split the returned document title into an array
+	
+}

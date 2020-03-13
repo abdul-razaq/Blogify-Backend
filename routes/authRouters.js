@@ -18,6 +18,9 @@ const signUpValidationMiddleware = [
 		.trim()
 		.isEmail()
 		.normalizeEmail(),
+	body('username', 'A username is required')
+		.isLength({ min: 5 })
+		.trim(),
 	body('password', 'Password is required')
 		.isAlphanumeric()
 		.isLength({ min: 8 }),
@@ -45,7 +48,8 @@ const updatePasswordValidation = [
 		.isLength({ min: 8 })
 		.custom((value, { req }) => {
 			return value === req.body.new_password;
-		}).withMessage('passwords do not match'),
+		})
+		.withMessage('passwords do not match'),
 ];
 authRoutes.post(
 	'/password/update',

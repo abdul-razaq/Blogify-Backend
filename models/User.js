@@ -25,6 +25,23 @@ const UserSchema = new Schema({
 		allowNull: false,
 	},
 
+	username: {
+		type: String,
+		required: true,
+		unique: true,
+		allowNull: false,
+	},
+
+	bio: {
+		type: String,
+		required: false,
+	},
+
+	dateJoined: {
+		type: String,
+		default: new Date().toLocaleString(),
+	},
+
 	password: {
 		type: String,
 		required: true,
