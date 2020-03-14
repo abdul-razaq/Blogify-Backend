@@ -24,7 +24,7 @@ module.exports = (req, res, next) => {
 	if (!decodedToken) {
 		const error = new Error('Not Authenticated');
 		error.statusCode = 401;
-		next(error);
+		return next(error);
 	}
 	// extract the user Id from the decoded token from the payload
 	const { userId } = decodedToken;

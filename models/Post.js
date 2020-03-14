@@ -41,9 +41,20 @@ const PostSchema = new mongoose.Schema(
 					required: true,
 					trim: true,
 				},
-				date: {
+				dateAdded: {
 					type: String,
 					default: new Date().toLocaleString(),
+				},
+
+				edited: {
+					type: Boolean,
+					default: false,
+					required: false,
+				},
+
+				dateModified: {
+					type: String,
+					required: false,
 				},
 				required: false,
 			},

@@ -6,13 +6,8 @@
 // He can update a user's post since he has access to all posts created, for example removing vulgar words and replacing them in a user's title, blog posts
 const adminRoutes = require('express').Router();
 
-adminRoutes.use((req, res, next) => {
-	console.log(
-		'You are at the admin route, are you authorized? thread carefully!!!'
-  );
-  next();
-});
+const adminControllers = require('../controllers/admin');
 
-adminRoutes.post('/login', )
+adminRoutes.post('/login');
 
 module.exports = adminRoutes;

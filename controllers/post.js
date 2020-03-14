@@ -1,7 +1,8 @@
+const { validationResult } = require('express-validator');
+
 const Post = require('../models/Post');
 const User = require('../models/User');
-
-const { validationResult } = require('express-validator');
+const AppError = require('../utils/AppError');
 
 exports.createPost = async (req, res, next) => {
 	const errors = validationResult(req);
@@ -14,22 +15,16 @@ exports.createPost = async (req, res, next) => {
 	const userId = req.userId;
 	const { title, content, category } = req.body;
 	if (!userId) {
-		const error = new Error('Not Authenticated!');
-		error.statusCode = 422;
-		next(error);
+		return next(new AppError('Not Authenticated!', 422));
 	}
 	try {
 		const user = await User.findById(userId);
 		if (!user) {
-			const error = new Error('User does not exist!');
-			error.statusCode = 404;
-			throw error;
+			return next(new AppError('User does not exist!', 404));
 		}
 		const prevPost = await Post.findOne({ title });
 		if (prevPost) {
-			const error = new Error('Post with this title already exists');
-			error.statusCode = 409;
-			throw error;
+			return next(new AppError('Post with this title already exists', 409));
 		}
 		const post = new Post({ title, content, category, creator: userId });
 		await post.save();
@@ -48,17 +43,13 @@ exports.editPost = async (req, res, next) => {
 	const userId = req.userId;
 	const postId = req.params.id;
 	if (!userId) {
-		const error = new Error('Not Authenticated');
-		error.statusCode = 403;
-		next(error);
+		return next(new AppError('Not Authenticated!', 422));
 	}
 	const { category, title, content } = req.body;
 	try {
 		const post = await Post.findOne({ _id: postId, creator: userId });
 		if (!post) {
-			const error = new Error('Post not found');
-			error.statusCode = 404;
-			throw error;
+			return next(new AppError('Not Found!', 404));
 		}
 		const editedPost = {
 			category,
@@ -67,9 +58,7 @@ exports.editPost = async (req, res, next) => {
 		};
 		const prevPost = await Post.findOne({ title: editedPost.title });
 		if (prevPost) {
-			const error = new Error('Post with this title already exists');
-			error.statusCode = 409;
-			throw error;
+			return next(new AppError('Post with this title already exists'));
 		}
 		await Post.findByIdAndUpdate(postId, editedPost);
 		res.status(200).json({ message: 'Post updated' });
@@ -85,22 +74,16 @@ exports.deletePost = async (req, res, next) => {
 	const userId = req.userId;
 	const postId = req.params.id;
 	if (!userId) {
-		const error = new Error('User not Authenticated');
-		error.statusCode = 403;
-		next(error);
+		return next(new AppError('Not Authenticated!', 422));
 	}
 	try {
 		const postToDelete = await Post.find({ _id: postId, creator: userId });
 		if (!postToDelete) {
-			const error = new Error('Post not found');
-			error.statusCode = 404;
-			throw error;
+			return next(new AppError('Not Found!', 404));
 		}
 		const result = await Post.findByIdAndRemove(postId);
 		if (!result) {
-			const error = new Error('Post not found');
-			error.statusCode = 404;
-			throw error;
+			return next(new AppError('Not Found!', 404));
 		}
 		const user = await User.findById(userId);
 		user.posts.pull(postId);
@@ -114,13 +97,10 @@ exports.deletePost = async (req, res, next) => {
 	}
 };
 
-// Delete all posts
 exports.deleteAllPosts = async (req, res, next) => {
 	const userId = req.userId;
 	if (!userId) {
-		const error = new Error('User not authenticated');
-		error.statusCode = 403;
-		next(error);
+		return next(new AppError('Not Authenticated!', 422));
 	}
 	try {
 		const user = await User.findById(userId);
@@ -140,18 +120,14 @@ exports.getAPost = async (req, res, next) => {
 	const userId = req.userId;
 	const postId = req.params.id;
 	if (!userId) {
-		const error = new Error('User not Authenticated!');
-		error.statusCode = 403;
-		next(error);
+		return next(new AppError('Not Authenticated!', 422));
 	}
 	try {
 		const post = await Post.findOne({ _id: postId, creator: userId }).select(
 			'-__v -creator'
 		);
 		if (!post) {
-			const error = new Error('Post not found!');
-			error.statusCode = 404;
-			throw error;
+			return next(new AppError('Not Found!', 404));
 		}
 		res.status(200).json({
 			message: 'Post found',
@@ -168,9 +144,7 @@ exports.getAPost = async (req, res, next) => {
 exports.getAllPosts = async (req, res, next) => {
 	const userId = req.userId;
 	if (!userId) {
-		const error = new Error('Not Authenticated!');
-		error.statusCode = 403;
-		next(error);
+		return next(new AppError('Not Authenticated!', 422));
 	}
 	try {
 		const user = await User.findById(userId);
@@ -213,9 +187,7 @@ exports.getFeeds = async (req, res, next) => {
 			total = await Post.countDocuments({});
 		}
 		if (!posts.length) {
-			const error = new Error('No more posts');
-			error.statusCode = 404;
-			throw error;
+			return next(new AppError('Not Found!', 404));
 		}
 		res.status(200).json({
 			message: 'Posts retrieved',
@@ -234,8 +206,15 @@ exports.getFeeds = async (req, res, next) => {
 
 exports.getAFeed = async (req, res, next) => {
 	const postId = req.params.id;
-	const post = await Post.findById(postId);
-	res.status(200).json({ post });
+	try {
+		const post = await Post.findById(postId);
+		res.status(200).json({ post });
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500;
+		}
+		return next(error);
+	}
 };
 
 exports.commentOnPost = async (req, res, next) => {
@@ -243,18 +222,84 @@ exports.commentOnPost = async (req, res, next) => {
 	const postId = req.params.id;
 	const { title, body } = req.body;
 	if (!userId) {
-		const error = new Error('Not logged in!');
-		error.statusCode = 422;
+		return next(new AppError('Not Authorized!', 422));
+	}
+	try {
+		const postToComment = await Post.findById(postId);
+		if (!postToComment) {
+			return next(new AppError('Not Found!', 404));
+		}
+		postToComment.comments.push({ creator: userId, title, body });
+		await postToComment.save();
+		res.status(200).json({ message: 'Comment added!' });
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500;
+		}
 		return next(error);
 	}
-	const postToComment = await Post.findById(postId);
-	postToComment.comments.push({ creator: userId, title, body });
-	await postToComment.save();
-	res.status(200).json({ message: 'Comment added!' });
 };
 
-exports.searchPost = (req, res, next) => {
-	// receive the user search query
-	// check the received user query against the document title in the database
-	// split the returned document title into an array
+exports.updateCommentOnPost = async (req, res, next) => {
+	const userId = req.userId;
+	const { postId, commentId } = req.params;
+	if (!userId) {
+		return next(new AppError('Not Authorized!', 422));
+	}
+	const { title, body } = req.body;
+	const postToEditComment = await Post.findOne({
+		_id: postId,
+	});
+	if (!postToEditComment) {
+		return next(new AppError('No post was found!', 404));
+	}
+
+	let commentToUpdate = postToEditComment.comments.filter(comment => {
+		return (
+			comment._id.toString() === commentId.toString() &&
+			comment.creator.toString() === userId.toString()
+		);
+	});
+	commentToUpdate = commentToUpdate[0];
+	if (!commentToUpdate) {
+		return next(new AppError('Unable to update comment', 500));
+	}
+	if (title && !body) {
+		commentToUpdate.title = title;
+		commentToUpdate.edited = true;
+		commentToUpdate.dateModified = new Date().toLocaleString();
+	} else if (!title && body) {
+		commentToUpdate.body = body;
+		commentToUpdate.edited = true;
+		commentToUpdate.dateModified = new Date().toLocaleString();
+	} else {
+		commentToUpdate.title = title;
+		commentToUpdate.body = body;
+		commentToUpdate.edited = true;
+		commentToUpdate.dateModified = new Date().toLocaleString();
+	}
+	await postToEditComment.save();
+	res.status(200).json({ message: 'Comment updated successfully!' });
+};
+
+exports.deleteCommentOnPost = async (req, res, next) => {
+	const userId = req.userId;
+	const { postId, commentId } = req.params;
+	console.log(userId);
+	if (!userId) {
+		return next(new AppError('Not Authenticated!', 422));
+	}
+	const postCommentToFilter = await Post.findOne({ _id: postId });
+	postCommentToFilter.comments.filter(comment => {
+		return (
+			comment._id.toString() !== commentId.toString() &&
+			comment.creator.toString() !== userId.toString()
+		);
+	});
+	// if (!filteredComment) {
+	// 	return next(new AppError('Unable to delete comment', 500));
+	// }
+	// postCommentToFilter.comments = filteredComment;
+	await postCommentToFilter.save();
+	res.status(200).json({ message: 'Comment deleted successfully!' });
 };

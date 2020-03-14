@@ -50,6 +50,18 @@ postRoutes.get('/feeds', postControllers.getFeeds);
 
 postRoutes.get('/feeds/:id', postControllers.getAFeed);
 
-postRoutes.post('/feeds/:id', requireLogin, postControllers.commentOnPost)
+postRoutes.post('/feeds/:id', requireLogin, postControllers.commentOnPost);
+
+postRoutes.post(
+	'/feeds/:postId/:commentId',
+	requireLogin,
+	postControllers.updateCommentOnPost
+);
+
+postRoutes.delete(
+	'/feeds/:postId/:commentId',
+	requireLogin,
+	postControllers.deleteCommentOnPost
+);
 
 module.exports = postRoutes;
