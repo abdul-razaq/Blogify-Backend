@@ -7,7 +7,58 @@
 const adminRoutes = require('express').Router();
 
 const adminControllers = require('../controllers/admin');
+const requireAdminLogin = require('../middlewares/requireAdminLogin');
 
-adminRoutes.post('/login');
+adminRoutes.post('/login', adminControllers.adminLogin);
+
+adminRoutes.get('/users/:userId', requireAdminLogin, adminControllers.getUser);
+
+adminRoutes.delete(
+	'/users/:userId',
+	requireAdminLogin,
+	adminControllers.deleteUser
+);
+
+adminRoutes.get(
+	'/users/status/:userId',
+	requireAdminLogin,
+	adminControllers.getUserStatus
+);
+
+adminRoutes.post(
+	'/users/status/:userId',
+	requireAdminLogin,
+	adminControllers.updateUserStatus
+);
+
+adminRoutes.get(
+	'/users/posts/:postId',
+	requireAdminLogin,
+	adminControllers.getAPost
+);
+
+adminRoutes.get(
+	'/users/posts/:userId',
+	requireAdminLogin,
+	adminControllers.getAllPosts
+);
+
+adminRoutes.patch(
+	'/users/posts/:postId',
+	requireAdminLogin,
+	adminControllers.editPost
+);
+
+adminRoutes.delete(
+	'/users/posts/:postId/:userId',
+	requireAdminLogin,
+	adminControllers.deletePost
+);
+
+adminRoutes.delete(
+	'/users/posts/:userId',
+	requireAdminLogin,
+	adminControllers.deleteAllPosts
+);
 
 module.exports = adminRoutes;
