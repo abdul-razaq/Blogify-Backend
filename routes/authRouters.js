@@ -36,6 +36,8 @@ authRoutes.post('/login', authControllers.login);
 
 authRoutes.post('/logout', requireLogin, authControllers.logout);
 
+authRoutes.delete('/', requireLogin, authControllers.deleteAccount);
+
 const updatePasswordValidation = [
 	body('old_password', 'Old Password is required')
 		.isAlphanumeric()

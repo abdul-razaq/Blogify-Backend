@@ -42,8 +42,14 @@ postRoutes.delete('/posts', requireLogin, postControllers.deleteAllPosts);
 
 postRoutes.get('/posts/:id', requireLogin, postControllers.getAPost);
 
+postRoutes.post('/posts/:id', requireLogin, postControllers.commentOnPost);
+
 postRoutes.get('/posts', requireLogin, postControllers.getAllPosts);
 
 postRoutes.get('/feeds', postControllers.getFeeds);
+
+postRoutes.get('/feeds/:id', postControllers.getAFeed);
+
+postRoutes.post('/feeds/:id', requireLogin, postControllers.commentOnPost)
 
 module.exports = postRoutes;

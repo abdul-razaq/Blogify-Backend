@@ -125,3 +125,27 @@ exports.updatePassword = async (req, res, next) => {
 		next(error);
 	}
 };
+
+exports.deleteAccount = async (req, res, next) => {
+	const userId = req.userId;
+	if (!userId) {
+		const error = new Error('Not Authorized!');
+		error.statusCode = 422;
+		return next(error);
+	}
+	try {
+		const user = await User.findById(userId);
+		if (!user) {
+			const error = new Error('User not found');
+			error.statusCode = 404;
+			throw error;
+		}
+		await User.findByIdAndRemove(userId);
+		res.status(200).json({ message: 'Account deleted successfully!' });
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500;
+		}
+		return next(error);
+	}
+};

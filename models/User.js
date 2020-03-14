@@ -2,8 +2,6 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const bcrypt = require('bcryptjs');
 
-const Post = require('../models/Post');
-
 const UserSchema = new Schema({
 	firstname: {
 		type: String,

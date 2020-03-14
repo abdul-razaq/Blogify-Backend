@@ -188,7 +188,6 @@ exports.deleteAccount = async (req, res, next) => {
 	}
 	try {
 		const removePosts = await Post.deleteMany({ creator: userId });
-		console.log(removePosts);
 		await User.findByIdAndDelete(userId);
 		res.status(200).json({ message: 'User deleted successfully!' });
 	} catch (error) {

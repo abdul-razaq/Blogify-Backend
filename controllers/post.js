@@ -217,15 +217,13 @@ exports.getFeeds = async (req, res, next) => {
 			error.statusCode = 404;
 			throw error;
 		}
-		res
-			.status(200)
-			.json({
-				message: 'Posts retrieved',
-				currentPage,
-				posts,
-				postsRemaining: total - (currentPage * postsPerPage),
-				totalPosts: total,
-			});
+		res.status(200).json({
+			message: 'Posts retrieved',
+			currentPage,
+			posts,
+			postsRemaining: total - currentPage * postsPerPage,
+			totalPosts: total,
+		});
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 500;
@@ -234,9 +232,29 @@ exports.getFeeds = async (req, res, next) => {
 	}
 };
 
+exports.getAFeed = async (req, res, next) => {
+	const postId = req.params.id;
+	const post = await Post.findById(postId);
+	res.status(200).json({ post });
+};
+
+exports.commentOnPost = async (req, res, next) => {
+	const userId = req.userId;
+	const postId = req.params.id;
+	const { title, body } = req.body;
+	if (!userId) {
+		const error = new Error('Not logged in!');
+		error.statusCode = 422;
+		return next(error);
+	}
+	const postToComment = await Post.findById(postId);
+	postToComment.comments.push({ creator: userId, title, body });
+	await postToComment.save();
+	res.status(200).json({ message: 'Comment added!' });
+};
+
 exports.searchPost = (req, res, next) => {
 	// receive the user search query
 	// check the received user query against the document title in the database
 	// split the returned document title into an array
-	
-}
+};
