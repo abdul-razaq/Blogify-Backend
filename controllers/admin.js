@@ -5,7 +5,7 @@ exports.adminLogin = async (req, res, next) => {
 	const { email, password } = req.body;
 	const admin = await User.findOne({ email, isAdmin: true });
 	if (!admin) {
-		return next(new AppError('Admin user not found!', 404));
+		return next(new AppError('Forbidden!', 403));
 	}
 	const isMatched = await admin.confirmPassword(password);
 	if (!isMatched) {

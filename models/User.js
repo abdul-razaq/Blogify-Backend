@@ -55,7 +55,7 @@ const UserSchema = new Schema({
 		default: true,
 	},
 
-	isActive: {
+	isAdmin: {
 		type: Boolean,
 		required: true,
 		allowNull: false,

@@ -16,12 +16,6 @@ const MONGODB_URI = 'mongodb://127.0.0.1:27017/blogify';
 
 app.set('port', process.env.PORT || 3000);
 
-// TODO: Add request logger middleware and cors middleware
-// app.use((req, res, next) => {
-// 	const { url, ip, httpVersion, method } = req;
-// 	console.log(method, ip, url, httpVersion);
-// 	next();
-// });
 // Middleware configurations
 app.use(morgan("dev"));
 app.use(express.json());
