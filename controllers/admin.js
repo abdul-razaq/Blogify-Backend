@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Post = require('../models/Post');
 const AppError = require('../utils/AppError');
 
 exports.adminLogin = async (req, res, next) => {
@@ -59,7 +60,7 @@ exports.getUserStatus = async (req, res, next) => {
 };
 
 exports.updateUserStatus = async (req, res, next) => {
-	const userId = req.params;
+	const { userId } = req.params;
 	const { isActive, isAdmin } = req.body;
 	if (!req.userId && !req.isAdmin) {
 		return next(new AppError('Not Authorized', 403));
@@ -88,7 +89,7 @@ exports.updateUserStatus = async (req, res, next) => {
 };
 
 exports.deleteUser = async (req, res, next) => {
-	const userId = req.params;
+	const { userId } = req.params;
 	if (!req.userId && !req.isAdmin) {
 		const error = new Error('Not Authorized');
 		error.statusCode = 422;
@@ -183,12 +184,13 @@ exports.editPost = async (req, res, next) => {
 };
 
 exports.deletePost = async (req, res, next) => {
-	const { postId, userId } = req.params;
+	const { postId } = req.params;
 	if (!req.userId && !req.isAdmin) {
 		return next(new AppError('Not Authenticated!', 422));
 	}
 	try {
-		const postToDelete = await Post.find({ _id: postId, creator: userId });
+		const postToDelete = await Post.findOne({ _id: postId });
+		console.log(postToDelete);
 		if (!postToDelete) {
 			return next(new AppError('Not Found!', 404));
 		}
@@ -196,9 +198,6 @@ exports.deletePost = async (req, res, next) => {
 		if (!result) {
 			return next(new AppError('Not Found!', 404));
 		}
-		const user = await User.findById(userId);
-		user.posts.pull(postId);
-		await user.save();
 		res.status(200).json({ message: 'Post deleted!' });
 	} catch (error) {
 		if (!error.statusCode) {

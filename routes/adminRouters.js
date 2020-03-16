@@ -25,7 +25,7 @@ adminRoutes.get(
 	adminControllers.getUserStatus
 );
 
-adminRoutes.post(
+adminRoutes.patch(
 	'/users/status/:userId',
 	requireAdminLogin,
 	adminControllers.updateUserStatus
@@ -50,7 +50,7 @@ adminRoutes.patch(
 );
 
 adminRoutes.delete(
-	'/users/posts/:postId/:userId',
+	'/users/posts/:postId',
 	requireAdminLogin,
 	adminControllers.deletePost
 );
