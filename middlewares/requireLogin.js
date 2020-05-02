@@ -1,35 +1,41 @@
-const jsonWebToken = require('jsonwebtoken');
+const jwt = require('jsonwebtoken')
 
-module.exports = (req, res, next) => {
-	// check to see if the Authorization header is set, by grabbing the authorization header
-	const authHeader = req.get('Authorization');
-	// if there is no Authorization set in the header throw unauthenticated error
-	if (!authHeader) {
-		const error = new Error('Not Authenticated');
-		error.statusCode = 401;
-		next(error);
+const User = require('../models/User')
+
+module.exports = async (req, res, next) => {
+	const authHeader = req.get('authorization')
+	if (!authHeader || typeof authHeader.split(' ')[1] === 'undefined') {
+		const error = new Error('Please authenticate!')
+		error.statusCode = 403
+		return next(error)
 	}
-	// if it is set, extract the token from the header and split it
-	const token = authHeader.split(' ')[1];
-	let decodedToken;
+	const token = authHeader.split(' ')[1]
 	try {
-		// verify and decode the token with jwt using the secret key
-		decodedToken = jsonWebToken.verify(token, 'thisismysecret');
+		const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
+		if (!decodedToken) {
+			const error = new Error('Error decoding token')
+			error.statusCode = 400
+			throw error
+		}
+		const { email, userId } = decodedToken
+		const authUserExists = await User.findOne({
+			_id: userId,
+			email: email,
+			'tokens.token': token,
+		})
+		if (!authUserExists) {
+			const error = new Error('Invalid token! Please authenticate')
+			error.statusCode = 403
+			throw error
+		}
+		req.token = token
+		req.email = email
+		req.userId = userId
+		next()
 	} catch (error) {
 		if (!error.statusCode) {
-			error.statusCode = 500;
+			error.statusCode = 500
 		}
-		next(error);
+		return next(error)
 	}
-	if (!decodedToken) {
-		const error = new Error('Not Authenticated');
-		error.statusCode = 401;
-		return next(error);
-	}
-	// extract the user Id from the decoded token from the payload
-	const { userId } = decodedToken;
-	// save the authenticated userId in the request object
-	req.userId = userId;
-	// continue to other middlewares in the middleware stack
-	next();
-};
+}

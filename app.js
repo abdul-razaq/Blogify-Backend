@@ -1,52 +1,41 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const morgan = require('morgan');
+require('dotenv').config()
+const express = require('express')
+const mongoose = require('mongoose')
+const cors = require('cors')
+const morgan = require('morgan')
+const app = express()
 
-const authRouters = require('./routes/authRouters');
-const userRouters = require('./routes/userRouters');
-const postRouters = require('./routes/postRouters');
-const generalError = require('./middlewares/generalError');
-const error404 = require('./middlewares/error404');
-const adminRouters = require('./routes/adminRouters');
+const upload = require('./utils/multerConfig')
 
-const app = express();
-// CONSTANTS
-const MONGODB_URI = 'mongodb://127.0.0.1:27017/blogify';
+app.set('port', process.env.PORT || 3000)
 
-app.set('port', process.env.PORT || 3000);
+app.use(morgan('dev'))
+app.use(cors())
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
 
-// Middleware configurations
-app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-// General middlewares
-// CORS middleware
-app.use(cors());
+app.use('/auth', upload.single('profilePicture'), require('./routes/authRouters'))
+app.use('/users', require('./routes/userRouters'))
+app.use(require('./routes/postRouters'))
+app.use('/admin', require('./routes/adminRouters'))
 
-// Register Routes Mini-Application Middlewares
-app.use('/auth', authRouters);
-app.use('/users', userRouters);
-app.use(postRouters);
-app.use('/admin', adminRouters);
-
-// Error 404 middleware
-app.use(error404);
-// General error handling middleware
-app.use(generalError);
+app.use(require('./middlewares/error404'))
+app.use(require('./middlewares/generalError'))
 
 mongoose
-	.connect(MONGODB_URI, {
+	.connect(process.env.MONGODB_URI, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
+		useFindAndModify: false,
+		useCreateIndex: true
 	})
 	.then(() => {
-		console.log('Application connected to the database successfully');
-		const port = app.get('port');
+		console.log('Application connected to the database successfully')
+		const port = app.get('port')
 		app.listen(port, () => {
-			console.log('Application listening on port ' + port);
-		});
+			console.log('Application listening on port ' + port)
+		})
 	})
-	.catch(err => {
-		console.log('Error connecting to the database');
-	});
+	.catch(() => {
+		console.log('Error connecting to the database')
+	})

@@ -1,101 +1,130 @@
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const mongoose = require('mongoose')
+const { Schema } = mongoose
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const Post = require('../models/Post')
 
-const UserSchema = new Schema({
-	firstname: {
-		type: String,
-		required: true,
-		trim: true,
-		allowNull: false,
+const UserSchema = new Schema(
+	{
+		firstname: {
+			type: String,
+			required: true,
+			trim: true,
+			index: true,
+			lowercase: true,
+		},
+
+		lastname: {
+			type: String,
+			required: true,
+			trim: true,
+			index: true,
+			lowercase: true,
+		},
+
+		email: {
+			type: String,
+			required: true,
+			trim: true,
+			lowercase: true,
+			index: true,
+			unique: true,
+		},
+
+		password: {
+			type: String,
+			required: true,
+		},
+
+		profilePicture: {
+			type: String,
+			required: false,
+		},
+
+		gender: {
+			type: String,
+			required: true,
+			lowercase: true,
+		},
+
+		bio: {
+			type: String,
+			required: false,
+			trim: true,
+		},
+
+		isAdmin: {
+			type: Boolean,
+			required: true,
+			default: false,
+			select: false,
+		},
+
+		posts: [{ post: { type: Schema.Types.ObjectId, ref: 'Post' } }],
+
+		tokens: [
+			{
+				token: {
+					type: String,
+					required: true,
+					unique: true,
+					index: true,
+				},
+			},
+		],
 	},
+	{ timestamps: true }
+)
 
-	lastname: {
-		type: String,
-		required: true,
-		trim: true,
-		allowNull: false,
-	},
+UserSchema.methods.generateToken = async function (email, id, isAdmin) {
+	const user = this
+	const token = jwt.sign(
+		{ email, userId: id, isAdmin },
+		process.env.JWT_SECRET,
+		{
+			expiresIn: '10h',
+		}
+	)
+	user.tokens.push({ token })
+	await user.save()
+	return token
+}
 
-	email: {
-		type: String,
-		required: true,
-		allowNull: false,
-	},
+UserSchema.virtual('fullName').get(function () {
+	const user = this
+	return `${user.firstname} ${user.lastname}`
+})
 
-	username: {
-		type: String,
-		required: true,
-		unique: true,
-		allowNull: false,
-	},
-
-	bio: {
-		type: String,
-		required: false,
-	},
-
-	dateJoined: {
-		type: String,
-		default: new Date().toLocaleString(),
-	},
-
-	password: {
-		type: String,
-		required: true,
-		allowNull: false,
-	},
-
-	isActive: {
-		type: Boolean,
-		required: true,
-		allowNull: false,
-		default: true,
-	},
-
-	isAdmin: {
-		type: Boolean,
-		required: true,
-		allowNull: false,
-		default: false,
-	},
-
-	posts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
-});
-
-UserSchema.virtual('fullName').get(function() {
-	const user = this;
-	return `${user.firstname} ${user.lastname}`;
-});
-
-UserSchema.pre('save', async function(next) {
-	const user = this;
+UserSchema.pre('save', async function (next) {
+	const user = this
 	if (user.isModified('password')) {
 		try {
-			const hashedPassword = await bcrypt.hash(user.password, 10);
-			user.password = hashedPassword;
-			next();
+			const hashedPassword = await bcrypt.hash(user.password, 10)
+			user.password = hashedPassword
+			next()
 		} catch (error) {
 			if (!error.statusCode) {
-				error.statusCode = 500;
+				error.statusCode = 500
 			}
-			next(error);
+			next(error)
 		}
 	}
-});
+})
 
-UserSchema.methods.confirmPassword = function(password) {
-	const user = this;
-	return bcrypt.compare(password, user.password);
-};
+UserSchema.pre('remove', async function (next) {
+	const user = this
+	try {
+		await Post.deleteMany({ creator: user._id })
+		next()
+	} catch (error) {
+		return next(error)
+	}
+})
 
-UserSchema.methods.generateToken = function(email, id) {
-	const token = jwt.sign({ email, userId: id }, 'thisismysecret', {
-		expiresIn: '10h',
-	});
-	return token;
-};
+UserSchema.methods.confirmPassword = function (password) {
+	const user = this
+	return bcrypt.compare(password, user.password)
+}
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', UserSchema)
