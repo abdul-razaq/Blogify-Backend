@@ -1,5 +1,4 @@
 const userRoutes = require('express').Router()
-const { body } = require('express-validator')
 
 const userControllers = require('../controllers/user')
 const requireLogin = require('../middlewares/requireLogin')

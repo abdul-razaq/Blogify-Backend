@@ -40,4 +40,13 @@ module.exports = {
 			})
 			.withMessage('passwords do not match'),
 	],
+
+	createPostValidation: [
+		body('title', 'post title is required')
+			.isLength({ min: 5 })
+			.trim()
+			.isString(),
+		body('content', 'post content is required').isString().trim(),
+		body('category', 'category of the post is required').isString().trim(),
+	],
 }
