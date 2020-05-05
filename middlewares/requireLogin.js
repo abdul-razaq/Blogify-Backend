@@ -17,7 +17,7 @@ module.exports = async (req, res, next) => {
 			error.statusCode = 400
 			throw error
 		}
-		const { email, userId } = decodedToken
+		const { email, userId, isAdmin } = decodedToken
 		const authUserExists = await User.findOne({
 			_id: userId,
 			email: email,
@@ -31,6 +31,7 @@ module.exports = async (req, res, next) => {
 		req.token = token
 		req.email = email
 		req.userId = userId
+		req.isAdmin = isAdmin
 		next()
 	} catch (error) {
 		if (!error.statusCode) {

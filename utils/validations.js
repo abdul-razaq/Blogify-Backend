@@ -1,7 +1,7 @@
 const { body } = require('express-validator')
 
 module.exports = {
-	signUpValidationMiddleware: [
+	signUpValidation: [
 		body('firstname', 'Firstname is required')
 			.trim()
 			.isLength({ min: 5 })

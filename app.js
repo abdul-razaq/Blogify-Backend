@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: false }))
 
 app.use('/auth', upload.single('profilePicture'), require('./routes/authRouters'))
 app.use('/users', require('./routes/userRouters'))
-app.use(require('./routes/postRouters'))
+app.use(upload.single('postImage'), require('./routes/postRouters'))
 app.use('/admin', require('./routes/adminRouters'))
 
 app.use(require('./middlewares/error404'))

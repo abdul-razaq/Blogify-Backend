@@ -9,11 +9,7 @@ exports.signup = async (req, res, next) => {
 	if (!errors.isEmpty()) {
 		const error = new Error('Validation failed, check input')
 		error.statusCode = 422
-		const errorsToSend = []
-		errors.array().forEach(error => {
-			errorsToSend.push(error.msg)
-		})
-		error.data = errorsToSend
+		error.data = errors.array().map(error => error.msg)
 		return next(error)
 	}
 	try {
@@ -23,13 +19,16 @@ exports.signup = async (req, res, next) => {
 			error.statusCode = 422
 			throw error
 		}
-		const filePath = req.file.path
-		const result = await cloudinary.uploadImage(filePath)
+		let result
+		if (req.file) {
+			const filePath = req.file.path
+			result = await cloudinary.uploadImage(filePath, 'profilePictures')
+			require('fs').unlinkSync(filePath)
+		}
 		const user = new User({
 			...req.body,
-			profilePicture: result.url,
+			profilePicture: result ? result.url : undefined,
 		})
-		require('fs').unlinkSync(filePath)
 		await user.save()
 		const token = await user.generateToken(
 			req.body.email,
@@ -86,7 +85,7 @@ exports.login = async (req, res, next) => {
 		if (!error.statusCode) {
 			error.statusCode = 500
 		}
-		next(error)
+		return next(error)
 	}
 }
 

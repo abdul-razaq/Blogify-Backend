@@ -11,36 +11,36 @@ postRoutes.put(
 	postControllers.createPost
 )
 
-postRoutes.patch(
-	'/posts/:id',
-	requireLogin,
-	postControllers.editPost
-)
+postRoutes.get('/posts', requireLogin, postControllers.getAllPosts)
+
+postRoutes.get('/posts/:id', requireLogin, postControllers.getPost)
+
+postRoutes.patch('/posts/:id', requireLogin, postControllers.editPost)
 
 postRoutes.delete('/posts/:id', requireLogin, postControllers.deletePost)
-
-postRoutes.delete('/posts', requireLogin, postControllers.deleteAllPosts)
-
-postRoutes.get('/posts/:id', requireLogin, postControllers.getAPost)
-
-postRoutes.post('/posts/:id', requireLogin, postControllers.commentOnPost)
-
-postRoutes.get('/posts', requireLogin, postControllers.getAllPosts)
 
 postRoutes.get('/feeds', postControllers.getFeeds)
 
 postRoutes.get('/feeds/:id', postControllers.getAFeed)
 
-postRoutes.post('/feeds/:id', requireLogin, postControllers.commentOnPost)
+postRoutes.post('/posts/:id/like', requireLogin, postControllers.likePost)
+
+postRoutes.post('/posts/:id/dislike', requireLogin, postControllers.dislikePost)
 
 postRoutes.post(
-	'/feeds/:postId/:commentId',
+	'/posts/:id/comment',
+	requireLogin,
+	postControllers.commentOnPost
+)
+
+postRoutes.patch(
+	'/posts/:id/comment/:commentId',
 	requireLogin,
 	postControllers.updateCommentOnPost
 )
 
 postRoutes.delete(
-	'/feeds/:postId/:commentId',
+	'/posts/:id/comment/:commentId',
 	requireLogin,
 	postControllers.deleteCommentOnPost
 )

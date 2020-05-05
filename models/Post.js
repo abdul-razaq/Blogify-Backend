@@ -33,11 +33,6 @@ const PostSchema = new mongoose.Schema(
 		comments: [
 			{
 				author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-				title: {
-					type: String,
-					required: true,
-					trim: true,
-				},
 				content: {
 					type: String,
 					required: true,
@@ -63,6 +58,11 @@ const PostSchema = new mongoose.Schema(
 		],
 
 		likes: [
+			{
+				user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+			},
+		],
+		dislikes: [
 			{
 				user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 			},

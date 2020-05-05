@@ -2,9 +2,9 @@ const authRoutes = require('express').Router()
 
 const authControllers = require('../controllers/auth')
 const requireLogin = require('../middlewares/requireLogin')
-const { signUpValidationMiddleware, updatePasswordValidation } = require('../utils/validations')
+const { signUpValidation, updatePasswordValidation } = require('../utils/validations')
 
-authRoutes.put('/signup', signUpValidationMiddleware, authControllers.signup)
+authRoutes.put('/signup', signUpValidation, authControllers.signup)
 
 authRoutes.post('/login', authControllers.login)
 

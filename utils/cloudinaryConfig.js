@@ -8,10 +8,10 @@ cloudinary.config({
 	api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-exports.uploadImage = file => {
+exports.uploadImage = (file, destFolder) => {
 	return cloudinary.uploader.upload(file, {
 		resource_type: 'image',
-		folder: 'profilePictures',
+		folder: destFolder,
 		transformation: {
 			width: 500,
 			height: 500,
