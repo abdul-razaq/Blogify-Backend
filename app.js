@@ -3,18 +3,28 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const morgan = require('morgan')
+const helmet = require('helmet')
+const compression = require('compression');
+
 const app = express()
 
 const upload = require('./utils/multerConfig')
 
 app.set('port', process.env.PORT || 3000)
 
+app.use(helmet())
+app.use(compression())
+
 app.use(morgan('dev'))
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-app.use('/auth', upload.single('profilePicture'), require('./routes/authRouters'))
+app.use(
+	'/auth',
+	upload.single('profilePicture'),
+	require('./routes/authRouters')
+)
 app.use('/users', require('./routes/userRouters'))
 app.use(upload.single('postImage'), require('./routes/postRouters'))
 app.use('/admin', require('./routes/adminRouters'))
@@ -27,7 +37,7 @@ mongoose
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
 		useFindAndModify: false,
-		useCreateIndex: true
+		useCreateIndex: true,
 	})
 	.then(() => {
 		console.log('Application connected to the database successfully')
